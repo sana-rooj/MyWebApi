@@ -8,9 +8,10 @@ namespace customerService.Models
 {
     public class Order
     {
+        
+       
         [Key]
-        public int SerialNo { get; set; }
-        public int Order_Idd { get; set; }
+        public int Order_Id { get; set; }
         public int Total_Items{ get; set; }
         public float Total_Price { get; set; }
         public float Total_Tax { get; set; }

@@ -28,25 +28,49 @@ namespace customerService.Controllers
             return _context.Orders;
         }
 
-        //// GET: api/Orders/5
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> GetOrder([FromRoute] int id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // GET: api/Orders/5
+        [HttpGet("{id}")]
+        public async Task<object> GetOrderAsync([FromRoute] int id)
+        {
+            List<Product> ProductsToShow = new List<Product>();
+            IQueryable<Object> ProductIds;
+            Order OrderObj = new Order();
+            OrderObj.Order_Id = id;
+            ProductIds=(from products in _context.Orders_Products
+                        where products.Order_ref.Equals(OrderObj)
+            select products.Product_ref);
+            List<Object> ids = ProductIds.ToList();
+        
+            foreach(var item in ids)
+            {
+                ProductsToShow.Add((Product)item);
+            }
+            int count = ProductsToShow.Count;
+          
 
-        //    var order = await _context.Orders.FindAsync(id);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    if (order == null)
-        //    {
-        //        return NotFound();
-        //    }
+            Order order = await _context.Orders.FindAsync(id);
 
-        //    return Ok(order);
-        //}
+            if (order == null)
+            {
+                return NotFound();
+            }
+            return new {order,ProductsToShow };
 
+        }
+
+        public IActionResult GetProducts(List<Object> list)
+        {
+            foreach (var obj in list)
+            {
+                return Ok(obj);
+            }
+            return Ok();
+        }
         // PUT: api/Orders/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutOrder([FromRoute] int id, [FromBody] Order order)
@@ -56,7 +80,7 @@ namespace customerService.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != order.Order_Idd)
+            if (id != order.Order_Id)
             {
                 return BadRequest();
             }
@@ -94,16 +118,18 @@ namespace customerService.Controllers
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetOrder", new { id = order.Order_Idd }, order);
+            return CreatedAtAction("GetOrder", new { id = order.Order_Id }, order);
         }
-        // GET: api/Orders/5/////////////for getting product data 
+        // GET: api/Orders/5/////////////for getting product data https://localhost:44396/api/Orders/add [3, 4]
         [HttpGet("add")]
         public async Task<IActionResult> GetProduct([FromBody] List<int> Id)
         {
-            int lastId = 0;int totalItems = 0;float price = 0;float sumTax = 0;int PID = 0;
-            lastId=(from order in _context.Orders
-             select order.Order_Idd).Max();
-            lastId++;
+            int totalItems = 0;float price = 0;float sumTax = 0;
+            List<Product> PID = new List<Product>() ;
+           
+            //lastId=(from order in _context.Orders
+            // select order.Order_Idd).Max();
+            //lastId++;
             if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
@@ -117,23 +143,45 @@ namespace customerService.Controllers
                     return NotFound();
 
                 }
+                PID.Add(product);
                 totalItems++;
                 price += product.Product_Price;
                 sumTax += product.Product_Tax;
-               
+                
             }
             Order OrderUser = new Order();
-            OrderUser.Order_Idd = lastId;
-            OrderUser.Order_Status = "Inprogress";
+
+
+            OrderUser.Order_Status = "Inprogress"+PID.Count;
             OrderUser.Total_Items=totalItems;
             OrderUser.Total_Price=price;
             OrderUser.Total_Sum_Tax=sumTax;
             OrderUser.Total_Tax=sumTax;
             await PostOrder(OrderUser);
+            foreach (var item in PID)
+            {
+                Order_Products reference = new Order_Products();
+                reference.Order_ref = OrderUser;
+                reference.Product_ref = item;
+                await PostOrder_Products(reference);
+            }
+        
             return Ok();
 
         }
+        [HttpPost]
+        public async Task<IActionResult> PostOrder_Products([FromBody] Order_Products order_Products)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
+            _context.Orders_Products.Add(order_Products);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetOrder_Products", new { id = order_Products.SerialNo }, order_Products);
+        }
 
 
         // DELETE: api/Orders/5
@@ -159,7 +207,7 @@ namespace customerService.Controllers
 
         private bool OrderExists(int id)
         {
-            return _context.Orders.Any(e => e.Order_Idd == id);
+            return _context.Orders.Any(e => e.Order_Id == id);
         }
     }
 }

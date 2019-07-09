@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace customerService.Migrations
 {
-    public partial class second : Migration
+    public partial class newcon : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,9 +11,8 @@ namespace customerService.Migrations
                 name: "Orders",
                 columns: table => new
                 {
-                    SerialNo = table.Column<int>(nullable: false)
+                    Order_Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Order_Idd = table.Column<int>(nullable: false),
                     Total_Items = table.Column<int>(nullable: false),
                     Total_Price = table.Column<float>(nullable: false),
                     Total_Tax = table.Column<float>(nullable: false),
@@ -22,7 +21,7 @@ namespace customerService.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Orders", x => x.SerialNo);
+                    table.PrimaryKey("PK_Orders", x => x.Order_Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -47,7 +46,7 @@ namespace customerService.Migrations
                 {
                     SerialNo = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Order_Id = table.Column<int>(nullable: false),
+                    Order_Id = table.Column<int>(nullable: true),
                     Product_Id = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
@@ -57,8 +56,8 @@ namespace customerService.Migrations
                         name: "FK_Orders_Products_Orders_Order_Id",
                         column: x => x.Order_Id,
                         principalTable: "Orders",
-                        principalColumn: "SerialNo",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Order_Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Orders_Products_Products_Product_Id",
                         column: x => x.Product_Id,

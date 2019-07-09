@@ -10,8 +10,8 @@ using customerService;
 namespace customerService.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20190709083051_second")]
-    partial class second
+    [Migration("20190709105631_newcon")]
+    partial class newcon
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,11 +23,9 @@ namespace customerService.Migrations
 
             modelBuilder.Entity("customerService.Models.Order", b =>
                 {
-                    b.Property<int>("SerialNo")
+                    b.Property<int>("Order_Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("Order_Idd");
 
                     b.Property<string>("Order_Status");
 
@@ -39,7 +37,7 @@ namespace customerService.Migrations
 
                     b.Property<float>("Total_Tax");
 
-                    b.HasKey("SerialNo");
+                    b.HasKey("Order_Id");
 
                     b.ToTable("Orders");
                 });
@@ -50,7 +48,7 @@ namespace customerService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("Order_Id");
+                    b.Property<int?>("Order_Id");
 
                     b.Property<int?>("Product_Id");
 
@@ -94,8 +92,7 @@ namespace customerService.Migrations
                 {
                     b.HasOne("customerService.Models.Order", "Order_ref")
                         .WithMany()
-                        .HasForeignKey("Order_Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("Order_Id");
 
                     b.HasOne("customerService.Models.Product", "Product_ref")
                         .WithMany()
